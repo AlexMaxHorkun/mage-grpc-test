@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: mage-grpc-client-container-kube
-          image: ogorkunad/magento-grpc-test-client:0.0.1
+          image: ogorkunad/magento-grpctest-client:0.1
           imagePullPolicy: Always
           ports:
             - name: http
@@ -31,7 +31,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 80
+    - port: 8080
       protocol: TCP
       name: http
       targetPort: 8080
@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
         - name: mage-grpc-phpserver-db-container-kube
-          image: ogorkunad/magento-grpc-test-phpserver-db:0.0.1
+          image: ogorkunad/magento-grpctest-db:0.1
           imagePullPolicy: Always
           ports:
             - name: tcp
@@ -94,11 +94,13 @@ spec:
     spec:
       containers:
         - name: mage-grpc-phpserver-container-kube
-          image: ogorkunad/magento-grpc-test-phpserver:0.0.1
+          image: ogorkunad/magento-grpctest-phpservice:0.1
           imagePullPolicy: Always
+          #command: [ "/bin/bash", "-c", "--" ]
+          #args: [ "while true; service ssh start; do sleep 30; done;" ]
           ports:
             - name: grpc
-              containerPort: 9000
+              containerPort: 50051
             - name: ssh
               containerPort: 22
 ---
@@ -107,15 +109,148 @@ kind: Service
 metadata:
   name: mage-grpc-phpserver
 spec:
-  type: LoadBalancer
+#  type: LoadBalancer
+  type: ClusterIP
+  ports:
+    - port: 9000
+      protocol: TCP
+      name: grpc
+      targetPort: 50051
+#    - port: 22223
+#      protocol: TCP
+#      name: ssh
+#      targetPort: 22
+  selector:
+    app: mage-grpc-phpserver
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mage-grpc-javaserver-db-deployment
+  labels:
+    app: mage-grpc-javaserver-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mage-grpc-javaserver-db
+  template:
+    metadata:
+      labels:
+        app: mage-grpc-javaserver-db
+    spec:
+      containers:
+        - name: mage-grpc-javaserver-db-container-kube
+          image: ogorkunad/magento-grpctest-db:0.1
+          imagePullPolicy: Always
+          ports:
+            - name: tcp
+              containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-javaserver-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      protocol: TCP
+      name: tcp
+      targetPort: 5432
+  selector:
+    app: mage-grpc-javaserver-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mage-grpc-javaserver-deployment
+  labels:
+    app: mage-grpc-javaserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mage-grpc-javaserver
+  template:
+    metadata:
+      labels:
+        app: mage-grpc-javaserver
+    spec:
+      containers:
+        - name: mage-grpc-javaserver-container-kube
+          image: ogorkunad/magento-grpctest-javaservice:0.1
+          imagePullPolicy: Always
+          ports:
+            - name: grpc
+              containerPort: 9000
+            - name: debug
+              containerPort: 5005
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-javaserver
+spec:
+  type: ClusterIP
   ports:
     - port: 9000
       protocol: TCP
       name: grpc
       targetPort: 9000
-    - port: 22
-      protocol: TCP
-      name: ssh
-      targetPort: 22223
   selector:
-    app: mage-grpc-phpserver
+    app: mage-grpc-javaserver
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: mage-grpc-javaserver-debug
+#spec:
+#  type: LoadBalancer
+#  ports:
+#    - port: 5005
+#      protocol: TCP
+#      name: debug
+#      targetPort: 5005
+#  selector:
+#    app: mage-grpc-javaserver
+#---
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: grpc-ui-deployment
+#  labels:
+#    app: grpc-ui
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: grpc-ui
+#  template:
+#    metadata:
+#      labels:
+#        app: grpc-ui
+#    spec:
+#      containers:
+#        - name: grpc-ui-kube
+#          image: ogorkunad/magento-grpctest-grpcclient:0.1
+#          imagePullPolicy: Always
+#          command: ["/bin/grpcui", "-plaintext", "-bind=0.0.0.0", "-port=8080", "-import-path=/etc/magento/proto", "-proto=magegrpc.proto"]
+#          args: ["mage-grpc-javaserver:9000"]
+#          ports:
+#            - name: http
+#              containerPort: 8080
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: grpc-ui
+#spec:
+#  type: LoadBalancer
+#  ports:
+#    - port: 8082
+#      protocol: TCP
+#      name: http
+#      targetPort: 8085
+#  selector:
+#    app: grpc-ui

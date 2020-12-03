@@ -1,0 +1,30 @@
+# grpc service configuration.
+grpc:
+  listen: tcp://0.0.0.0:50051
+  proto: "proto/dummy.proto"
+  workers.command: "php app.php"
+
+# queue and jobs
+jobs:
+  dispatch:
+    app-job-*.pipeline: "local"
+  pipelines:
+    local:
+      broker: "ephemeral"
+  consume: ["local"]
+
+  workers:
+    command: "php app.php"
+    pool.numWorkers: 4
+
+# control the max memory usage
+limit:
+  services:
+    grpc.maxMemory: 100
+
+broadcast:
+  # optional, redis broker configuration
+  redis:
+    addr:      "localhost:6379"
+    password: ""
+    db:        0
