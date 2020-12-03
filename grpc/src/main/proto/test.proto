@@ -1,0 +1,19 @@
+syntax = "proto3";
+option java_package = "com.magento.grpctest.def";
+
+//DTOs
+message GenerateArg {
+  int32 number = 1;
+  bool async = 2;
+}
+
+message GeneratedProd {
+  string id = 1;
+  string sku = 2;
+  float price = 3;
+}
+
+//Services
+service Products {
+  rpc generate(GenerateArg) returns (stream GeneratedProd);
+}
