@@ -86,14 +86,14 @@ public class ProductRepo {
         }
 
         var count = (int)count();
-        int offset;
+        int page;
         if (count <= limit) {
-            offset = 0;
+            page = 1;
         } else {
-            offset = rand.nextInt(count - limit + 1);
+            page = rand.nextInt(count / limit + ((count % limit == 0) ? 0 : 1) + 1);
         }
 
-        return crudRepo.findProducts(limit, offset);
+        return crudRepo.findAll(PageRequest.of(page, limit)).getContent();
     }
 
     private <T> T extractFutureResult(Future<T> future) {

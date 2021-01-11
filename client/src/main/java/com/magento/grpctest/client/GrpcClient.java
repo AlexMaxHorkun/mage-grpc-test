@@ -120,7 +120,7 @@ public final class GrpcClient {
             var channel = createChannel();
             try {
                 var service = ProductsGrpc.newStub(channel);
-                service.read(Magegrpc.ReadRequest.newBuilder().build(), new ReadObserver(future));
+                service.read(Magegrpc.ReadRequest.newBuilder().setN(number).build(), new ReadObserver(future));
                 try {
                     future.get();
                 } catch (Throwable ex) {
@@ -206,7 +206,7 @@ public final class GrpcClient {
         Throwable readerException = null;
         for (var promise : responsePromises) {
             try {
-                promise.get().getItemsList().addAll(responses);
+                responses.addAll(promise.get().getItemsList());
             } catch (Throwable ex) {
                 readerException = ex;
             }

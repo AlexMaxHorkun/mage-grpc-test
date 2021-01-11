@@ -176,6 +176,7 @@ public class Products extends ProductsGrpc.ProductsImplBase {
             }
         } catch (Throwable ex) {
             responseObserver.onError(ex);
+            logger.error("[GRPC] Read operation error", ex);
             return;
         }
         responseObserver.onNext(response.build());
