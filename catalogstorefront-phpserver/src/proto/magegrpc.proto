@@ -1,0 +1,53 @@
+syntax = "proto3";
+option java_package = "com.magento.grpctest.def";
+
+package magento.grpcTestApi.proto;
+
+option php_metadata_namespace = "Magento\\GrpcTestApi\\Metadata";
+
+//DTOs
+message GenerateArg {
+  int32 number = 1;
+  bool async = 2;
+}
+
+message Option {
+  string id = 1;
+  string title = 2;
+  float price = 3;
+  bool available = 5;
+}
+
+message Product {
+  string id = 1;
+  string sku = 2;
+  float price = 3;
+  string title = 4;
+  string description = 5;
+  string img_url = 6;
+  bool available = 7;
+  repeated Option options = 8;
+}
+
+message ClearArg {};
+
+message Cleared {};
+
+
+// read specified N products, just for testing
+message ReadRequest {
+  int32 n = 1;
+}
+
+message ReadResponse {
+  repeated Product items = 1;
+}
+
+//Services
+service Products {
+  rpc generate(GenerateArg) returns (stream Product);
+
+  rpc read(ReadRequest) returns (ReadResponse);
+
+  rpc clear(ClearArg) returns (Cleared);
+}
