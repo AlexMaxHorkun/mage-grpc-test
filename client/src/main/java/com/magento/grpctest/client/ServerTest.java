@@ -24,6 +24,10 @@ public class ServerTest {
 
         private Duration javaAsyncClientTime;
 
+        private Duration mageClientTime;
+
+        private Duration mageAsyncClientTime;
+
         public GenerateResponse() { }
 
         public Duration getPhpClientTime() {
@@ -50,6 +54,22 @@ public class ServerTest {
             this.javaAsyncClientTime = javaAsyncClientTime;
         }
 
+        public Duration getMageClientTime() {
+            return mageClientTime;
+        }
+
+        public void setMageClientTime(Duration mageClientTime) {
+            this.mageClientTime = mageClientTime;
+        }
+
+        public Duration getMageAsyncClientTime() {
+            return mageAsyncClientTime;
+        }
+
+        public void setMageAsyncClientTime(Duration mageAsyncClientTime) {
+            this.mageAsyncClientTime = mageAsyncClientTime;
+        }
+
         public Duration getPhpAsyncClientTime() {
             return phpAsyncClientTime;
         }
@@ -64,9 +84,12 @@ public class ServerTest {
 
         private Boolean phpCleared;
 
-        public ClearResponse(boolean javaCleared, boolean phpCleared) {
+        private Boolean mageCleared;
+
+        public ClearResponse(boolean javaCleared, boolean phpCleared, boolean mageCleared) {
             this.javaCleared = javaCleared;
             this.phpCleared = phpCleared;
+            this.mageCleared = mageCleared;
         }
 
         public Boolean getJavaCleared() {
@@ -76,6 +99,10 @@ public class ServerTest {
         public Boolean getPhpCleared() {
             return phpCleared;
         }
+
+        public Boolean getMageCleared() {
+            return mageCleared;
+        }
     }
 
     public static class ReadResponse {
@@ -83,11 +110,14 @@ public class ServerTest {
 
         private Duration javaReadTime;
 
+        private Duration mageReadTime;
+
         public ReadResponse() {}
 
-        public ReadResponse(Duration phpReadTime, Duration javaReadTime) {
+        public ReadResponse(Duration phpReadTime, Duration javaReadTime, Duration mageReadTime) {
             this.phpReadTime = phpReadTime;
             this.javaReadTime = javaReadTime;
+            this.mageReadTime = mageReadTime;
         }
 
         public Duration getPhpReadTime() {
@@ -96,6 +126,10 @@ public class ServerTest {
 
         public Duration getJavaReadTime() {
             return javaReadTime;
+        }
+
+        public Duration getMageReadTime() {
+            return mageReadTime;
         }
     }
 
@@ -108,32 +142,39 @@ public class ServerTest {
 
     private final GrpcClient javaClient;
 
+    private final GrpcClient mageClient;
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ServerTest(@Autowired GrpcClient phpClient, @Autowired GrpcClient javaClient) {
+    public ServerTest(@Autowired GrpcClient phpClient, @Autowired GrpcClient javaClient,
+                      @Autowired GrpcClient mageClient) {
         this.phpClient = phpClient;
         this.javaClient = javaClient;
+        this.mageClient = mageClient;
     }
 
     @GetMapping(value = "invoke-generate")
     public ResponseEntity<GenerateResponse> generate(@Valid @NotNull @Min(1) @RequestParam("count") Integer count,
-                                                 @Valid @NotNull @Min(1) @RequestParam("connections") Integer connections,
-                                                 @Valid @RequestParam("client") Client client) {
-        if (client == null) {
-            client = Client.PHP;
-        }
+                                                 @Valid @NotNull @Min(1) @RequestParam("connections") Integer connections) {
         var resp = new GenerateResponse();
-        if (client == Client.PHP) {
+        try {
             resp.setPhpClientTime(phpClient.callGenerate(false, count, connections));
+        } catch (Throwable ex) { /* Ignore */ }
+        try {
             resp.setPhpAsyncClientTime(phpClient.callGenerate(true, count, connections));
+        } catch (Throwable ex) { /* Ignore */ }
+        try {
             resp.setJavaClientTime(javaClient.callGenerate(false, count, connections));
+        } catch (Throwable ex) { /* Ignore */ }
+        try {
             resp.setJavaAsyncClientTime(javaClient.callGenerate(true, count, connections));
-        } else {
-            resp.setJavaClientTime(javaClient.callGenerate(false, count, connections));
-            resp.setJavaAsyncClientTime(javaClient.callGenerate(true, count, connections));
-            resp.setPhpClientTime(phpClient.callGenerate(false, count, connections));
-            resp.setPhpAsyncClientTime(phpClient.callGenerate(true, count, connections));
-        }
+        } catch (Throwable ex) { /* Ignore */ }
+        try {
+            resp.setMageClientTime(mageClient.callGenerate(false, count, connections));
+        } catch (Throwable ex) { /* Ignore */ }
+        try {
+            resp.setMageAsyncClientTime(mageClient.callGenerate(true, count, connections));
+        } catch (Throwable ex) { /* Ignore */ }
 
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
@@ -142,6 +183,7 @@ public class ServerTest {
     public ResponseEntity<ClearResponse> clear() {
         boolean javaCleared = true;
         boolean phpCleared = true;
+        boolean mageCleared = true;
         try {
             javaClient.clear();
         } catch (Throwable ex) {
@@ -154,8 +196,14 @@ public class ServerTest {
             phpCleared = false;
             logger.error(String.format("Error while clearing PHP server: %s", ex.getMessage()));
         }
+        try {
+            mageClient.clear();
+        } catch (Throwable ex) {
+            mageCleared = false;
+            logger.error(String.format("Error while clearing Magento server: %s", ex.getMessage()));
+        }
 
-        return new ResponseEntity<>(new ClearResponse(javaCleared, phpCleared), HttpStatus.OK);
+        return new ResponseEntity<>(new ClearResponse(javaCleared, phpCleared, mageCleared), HttpStatus.OK);
     }
 
     @GetMapping(value = "invoke-read")
@@ -163,7 +211,8 @@ public class ServerTest {
                                              @Valid @NotNull @Min(1) @RequestParam("connections") Integer connections) {
 
         return new ResponseEntity<>(
-                new ReadResponse(phpClient.callRead(number, connections), javaClient.callRead(number, connections)),
+                new ReadResponse(phpClient.callRead(number, connections), javaClient.callRead(number, connections),
+                        mageClient.callRead(number, connections)),
                 HttpStatus.OK
         );
     }

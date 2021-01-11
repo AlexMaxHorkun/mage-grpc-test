@@ -203,14 +203,18 @@ public final class GrpcClient {
         executor.shutdown();
 
         //Waiting for responses
+        Throwable readerException = null;
         for (var promise : responsePromises) {
             try {
                 promise.get().getItemsList().addAll(responses);
             } catch (Throwable ex) {
-                throw new RuntimeException(ex);
+                readerException = ex;
             }
         }
         var finished = LocalDateTime.now();
+        if (readerException != null) {
+            throw new RuntimeException(readerException);
+        }
 
         //Validating responses
         validateProductsReceived(responses);

@@ -14,4 +14,9 @@ public class Config {
     public GrpcClient javaClient() {
         return new GrpcClient("mage-grpc-javaserver", 9000);
     }
+
+    @Bean
+    public GrpcClient mageClient() {
+        return new GrpcClient("catalogstorefront", 9001);
+    }
 }
