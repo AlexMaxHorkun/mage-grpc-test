@@ -30,9 +30,20 @@ message ClearArg {};
 
 message Cleared {};
 
+// read specified N products, just for testing
+message ReadRequest {
+  int32 n = 1;
+}
+
+message ReadResponse {
+  repeated Product items = 1;
+}
+
 //Services
 service Products {
   rpc generate(GenerateArg) returns (stream Product);
+
+  rpc read(ReadRequest) returns (ReadResponse);
 
   rpc clear(ClearArg) returns (Cleared);
 }

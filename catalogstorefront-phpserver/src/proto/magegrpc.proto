@@ -33,7 +33,6 @@ message ClearArg {};
 
 message Cleared {};
 
-
 // read specified N products, just for testing
 message ReadRequest {
   int32 n = 1;
