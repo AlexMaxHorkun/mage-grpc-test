@@ -135,7 +135,8 @@ public class ServerTest {
 
     public enum Client {
         PHP,
-        JAVA
+        JAVA,
+        MAGENTO
     }
 
     private final GrpcClient phpClient;
@@ -209,11 +210,31 @@ public class ServerTest {
     @GetMapping(value = "invoke-read")
     public ResponseEntity<ReadResponse> read(@Valid @NotNull @Min(1) @RequestParam("number") Integer number,
                                              @Valid @NotNull @Min(1) @RequestParam("connections") Integer connections) {
+        Duration phpReadResult = null;
+        Duration javaReadResult = null;
+        Duration mageReadResult = null;
+        try {
+            phpReadResult = phpClient.callRead(number, connections);
+        } catch (Throwable ex) {
+            logException(ex, Client.PHP, "read");
+        }
+        try {
+            javaReadResult = javaClient.callRead(number, connections);
+        } catch (Throwable ex) {
+            logException(ex, Client.JAVA, "read");
+        }
+        try {
+            mageReadResult = mageClient.callRead(number, connections);
+        } catch (Throwable ex) {
+            logException(ex, Client.MAGENTO, "read");
+        }
 
-        return new ResponseEntity<>(
-                new ReadResponse(phpClient.callRead(number, connections), javaClient.callRead(number, connections),
-                        mageClient.callRead(number, connections)),
-                HttpStatus.OK
-        );
+        return new ResponseEntity<>(new ReadResponse(phpReadResult, javaReadResult, mageReadResult), HttpStatus.OK);
+    }
+
+    private void logException(Throwable exception, Client fromClient, String operationName) {
+        logger.error(String.format("[GRPC TEST] Exception occurred while calling operation \"%s\" of %s client",
+                operationName, fromClient),
+                exception);
     }
 }
