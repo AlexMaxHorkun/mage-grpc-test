@@ -84,24 +84,7 @@ public class Products extends ProductsGrpc.ProductsImplBase {
         }
 
         private void relay(Product product) {
-            var response = Magegrpc.Product.newBuilder()
-                    .setId(product.getId().toString())
-                    .setSku(product.getSku())
-                    .setTitle(product.getTitle())
-                    .setDescription(product.getDescription())
-                    .setPrice(product.getPrice())
-                    .setAvailable(product.getAvailable())
-                    .setImgUrl(product.getImgUrl());
-            for (var option : product.getOptions()) {
-                response.addOptions(Magegrpc.Option.newBuilder()
-                        .setId(option.getId().toString())
-                        .setTitle(option.getTitle())
-                        .setPrice(option.getPrice())
-                        .setAvailable(option.getAvailable())
-                        .build());
-            }
-
-            responseObserver.send(response.build());
+            responseObserver.send(createProductOf(product));
         }
     }
 
@@ -181,5 +164,42 @@ public class Products extends ProductsGrpc.ProductsImplBase {
             responseObserver.onError(ex);
             logger.error(ex.getMessage());
         }
+    }
+
+    @Override
+    public void read(Magegrpc.ReadRequest request, StreamObserver<Magegrpc.ReadResponse> responseObserver) {
+        var response = Magegrpc.ReadResponse.newBuilder();
+        try {
+            var found = manager.find(request.getN());
+            for (var prod : found) {
+                response.addItems(createProductOf(prod));
+            }
+        } catch (Throwable ex) {
+            responseObserver.onError(ex);
+            return;
+        }
+        responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
+    }
+
+    private static Magegrpc.Product createProductOf(Product product) {
+        var grpcProduct = Magegrpc.Product.newBuilder()
+                .setId(product.getId().toString())
+                .setSku(product.getSku())
+                .setTitle(product.getTitle())
+                .setDescription(product.getDescription())
+                .setPrice(product.getPrice())
+                .setAvailable(product.getAvailable())
+                .setImgUrl(product.getImgUrl());
+        for (var option : product.getOptions()) {
+            grpcProduct.addOptions(Magegrpc.Option.newBuilder()
+                    .setId(option.getId().toString())
+                    .setTitle(option.getTitle())
+                    .setPrice(option.getPrice())
+                    .setAvailable(option.getAvailable())
+                    .build());
+        }
+
+        return grpcProduct.build();
     }
 }

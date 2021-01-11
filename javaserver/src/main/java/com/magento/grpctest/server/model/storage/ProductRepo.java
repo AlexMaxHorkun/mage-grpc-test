@@ -2,9 +2,11 @@ package com.magento.grpctest.server.model.storage;
 
 import com.magento.grpctest.server.model.storage.data.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +38,8 @@ public class ProductRepo {
     private final CrudProductRepo crudRepo;
 
     private final Persister persister;
+
+    private final SecureRandom rand = new SecureRandom();
 
     public ProductRepo(@Autowired CrudProductRepo crudRepo, @Autowired Persister persister) {
         this.crudRepo = crudRepo;
@@ -74,6 +78,22 @@ public class ProductRepo {
     @Transactional
     public void clear() {
         crudRepo.deleteProducts();
+    }
+
+    public List<Product> findAll(int limit) {
+        if (limit < 1) {
+            throw new IllegalArgumentException("Invalid limit provided");
+        }
+
+        var count = (int)count();
+        int offset;
+        if (count <= limit) {
+            offset = 0;
+        } else {
+            offset = rand.nextInt(count - limit + 1);
+        }
+
+        return crudRepo.findProducts(limit, offset);
     }
 
     private <T> T extractFutureResult(Future<T> future) {

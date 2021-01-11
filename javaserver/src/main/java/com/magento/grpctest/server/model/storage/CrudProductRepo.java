@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CrudProductRepo extends CrudRepository<Product, UUID> {
@@ -14,4 +15,7 @@ public interface CrudProductRepo extends CrudRepository<Product, UUID> {
     @Modifying
     @Query(value = "DELETE FROM prods", nativeQuery = true)
     public void deleteProducts();
+
+    @Query(value = "SELECT p.* FROM Product p ORDER BY p.id ASC LIMIT ?1 OFFSET ?2", nativeQuery = true)
+    public List<Product> findProducts(int limit, int offset);
 }

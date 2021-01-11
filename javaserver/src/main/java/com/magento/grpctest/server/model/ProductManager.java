@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -58,5 +59,9 @@ public class ProductManager {
 
     public void clear() {
         repo.clear();
+    }
+
+    public List<Product> find(int limit) {
+        return repo.findAll(limit);
     }
 }
