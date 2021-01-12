@@ -30,10 +30,25 @@ type OptionMessage struct {
 	Available bool `json:"available"`
 }
 
-type ProductMessage struct {
+type GeneratedProductMessage struct {
 	Finished bool `json:"finished"`
 	Success bool `json:"success"`
 	ErrorMsg string `json:"error_msg"`
+	Product *ProductMessage `json:"product"`
+}
+
+type JobResult struct {
+	Message *GeneratedProductMessage
+	Err *error
+	Finished bool
+}
+
+type ClearMessage struct {
+	Success bool `json:"success"`
+	ErrorMsg string `json:"error_msg"`
+}
+
+type ProductMessage struct {
 	Id string `json:"id"`
 	Sku string `json:"sku"`
 	Price float32 `json:"price"`
@@ -44,15 +59,10 @@ type ProductMessage struct {
 	Options *[]OptionMessage `json:"options"`
 }
 
-type JobResult struct {
-	Message *ProductMessage
-	Err *error
-	Finished bool
-}
-
-type ClearMessage struct {
+type ProductsReadMessage struct {
 	Success bool `json:"success"`
 	ErrorMsg string `json:"error_msg"`
+	Products *[]ProductMessage `json:"products"`
 }
 
 func (s *Service) Init(g *grpc.Service, q *jobs.Service, p *broadcast.Service) (bool, error) {
@@ -95,26 +105,7 @@ func (s *Service) Generate(in *GenerateArg, stream Products_GenerateServer) erro
 	for result := range results {
 		if result.Message != nil {
 			msg := result.Message
-			responseOptions := make([]*Option, 0)
-			response := &Product{
-				Id:                   msg.Id,
-				Sku:                  msg.Sku,
-				Price:                msg.Price,
-				Title:                msg.Title,
-				Description:          msg.Description,
-				ImgUrl:               msg.ImgUrl,
-				Available:            msg.Available,
-			}
-			for _, option := range *msg.Options {
-				responseOptions = append(responseOptions, &Option{
-					Id:        option.Id,
-					Title:     option.Title,
-					Price:     option.Price,
-					Available: option.Available,
-				})
-			}
-			response.Options = responseOptions
-			if err := stream.Send(response); err != nil {
+			if err := stream.Send(convertToGrpcProduct(msg.Product)); err != nil {
 				return err
 			}
 		} else if result.Finished {
@@ -161,6 +152,43 @@ func (s *Service) Clear(context context.Context, in *ClearArg) (*Cleared, error)
 	return &Cleared{}, nil
 }
 
+func (s *Service) Read(context context.Context, in *ReadRequest) (*ReadResponse, error) {
+	client := s.pubsub.NewClient()
+	defer client.Close()
+	//Start topic
+	topicId := fmt.Sprintf("mage_grpc_read_topic_%d", s.randomizer.Int())
+	if err := client.Subscribe(topicId); err != nil {
+		return nil, err
+	}
+	//Start the background producer
+	_, err := s.queue.Push(&jobs.Job{
+		Job:     "app.job.ProductsRead",
+		Payload: fmt.Sprintf(`{"requestID":"%s", "limit":%d}`, topicId, in.N),
+		Options: &jobs.Options{},
+	})
+	if err != nil {
+		return nil, err
+	}
+	//Listen
+	readMessage := &ProductsReadMessage{}
+	jobMessage := <- client.Channel()
+	if err := json.Unmarshal(jobMessage.Payload, readMessage); err != nil {
+		return nil, err
+	}
+	if !readMessage.Success {
+		return nil, errors.New(readMessage.ErrorMsg)
+	}
+
+	//Generate response
+	response := &ReadResponse{
+		Items: make([]*Product, 0),
+	}
+	for _, product := range *readMessage.Products {
+		response.Items = append(response.Items, convertToGrpcProduct(&product))
+	}
+	return response, nil
+}
+
 func (s *Service) initGenerateJob(count int, results chan *JobResult) {
 	client := s.pubsub.NewClient()
 	defer client.Close()
@@ -190,7 +218,7 @@ func (s *Service) initGenerateJob(count int, results chan *JobResult) {
 	jobChan := client.Channel()
 	// forward data from topic to stream
 	for msgData := range jobChan {
-		msg := &ProductMessage{}
+		msg := &GeneratedProductMessage{}
 		if err := json.Unmarshal(msgData.Payload, msg); err != nil {
 			results <- &JobResult{
 				Err: &err,
@@ -216,4 +244,28 @@ func (s *Service) initGenerateJob(count int, results chan *JobResult) {
 			Message: msg,
 		}
 	}
+}
+
+func convertToGrpcProduct(product *ProductMessage) *Product {
+	options := make([]*Option, 0)
+	result := &Product{
+		Id:                   product.Id,
+		Sku:                  product.Sku,
+		Price:                product.Price,
+		Title:                product.Title,
+		Description:          product.Description,
+		ImgUrl:               product.ImgUrl,
+		Available:            product.Available,
+	}
+	for _, option := range *product.Options {
+		options = append(options, &Option{
+			Id:        option.Id,
+			Title:     option.Title,
+			Price:     option.Price,
+			Available: option.Available,
+		})
+	}
+	result.Options = options
+
+	return result
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Dto\Option;
 use App\Dto\Product;
 
 class ProductManager
@@ -15,7 +16,11 @@ class ProductManager
 
     private const DELETE_SQL = 'DELETE FROM prods';
 
-    private const COUNT_SQL = 'SELECT count(*) cnt FROM prods p LEFT JOIN prod_options o on o.prod_id = p.id';
+    private const COUNT_SQL = 'SELECT count(*) cnt FROM prods p';
+
+    private const SELECT_SQL = 'SELECT * FROM prods p ORDER BY p.id ASC LIMIT :lim OFFSET :off';
+
+    private const SELECT_OPTIONS_SQL = 'SELECT * FROM prod_options o WHERE o.prod_id IN (%ids%) ORDER BY o.prod_id ASC';
 
     private \PDO $pdo;
 
@@ -92,6 +97,63 @@ class ProductManager
     public function count(): int
     {
         return (int)$this->pdo->query(self::COUNT_SQL)->fetch()['cnt'];
+    }
+
+    /**
+     * @param int $limit
+     * @return Product[]
+     */
+    public function find(int $limit): array
+    {
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('Invalid limit provided');
+        }
+        $count = $this->count();
+        if ($count <= $limit) {
+            $offset = 0;
+        } else {
+            $offset = random_int(0, $count - $limit);
+        }
+
+        $stmt = $this->pdo->prepare(self::SELECT_SQL);
+        $stmt->bindValue(':lim', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':off', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        $products = [];
+        foreach ($rows as $row) {
+            $product = new Product();
+            $products[$row['id']] = $product;
+            $product->setId($row['id']);
+            $product->setTitle($row['title']);
+            $product->setDescription($row['description']);
+            $product->setSku($row['sku']);
+            $product->setImgUrl($row['img_url']);
+            $product->setPrice((float)$row['price']);
+            $product->setAvailable((bool)$row['available']);
+        }
+
+        if ($products) {
+            $rows = $this->pdo->query(
+                str_replace('%ids%',
+                    implode(', ', array_map(function ($id) {
+                        return $this->pdo->quote($id);
+                    }, array_keys($products))),
+                    self::SELECT_OPTIONS_SQL
+                )
+            )->fetchAll();
+            foreach ($rows as $row) {
+                $product = $products[$row['prod_id']];
+                $option = new Option();
+                $option->setId($row['id']);
+                $option->setTitle($row['title']);
+                $option->setPrice((float)$row['price']);
+                $option->setAvailable((bool)$row['available']);
+                $product->setOptions(array_merge($product->getOptions(), [$option]));
+            }
+        }
+
+        return array_values($products);
     }
 
     private function generateUuid(): string

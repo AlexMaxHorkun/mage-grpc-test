@@ -37,100 +37,100 @@ spec:
       targetPort: 8080
   selector:
     app: mage-grpc-client
-#---
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: mage-grpc-phpserver-db-deployment
-#  labels:
-#    app: mage-grpc-phpserver-db
-#spec:
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: mage-grpc-phpserver-db
-#  template:
-#    metadata:
-#      labels:
-#        app: mage-grpc-phpserver-db
-#    spec:
-#      containers:
-#        - name: mage-grpc-phpserver-db-container-kube
-#          image: ogorkunad/magento-grpctest-db:0.1
-#          imagePullPolicy: Always
-#          ports:
-#            - name: tcp
-#              containerPort: 5432
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: mage-grpc-phpserver-db
-#spec:
-#  type: ClusterIP
-#  ports:
-#    - port: 5432
-#      protocol: TCP
-#      name: tcp
-#      targetPort: 5432
-#  selector:
-#    app: mage-grpc-phpserver-db
-#---
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: mage-grpc-phpserver-deployment
-#  labels:
-#    app: mage-grpc-phpserver
-#spec:
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: mage-grpc-phpserver
-#  template:
-#    metadata:
-#      labels:
-#        app: mage-grpc-phpserver
-#    spec:
-#      containers:
-#        - name: mage-grpc-phpserver-container-kube
-#          image: ogorkunad/magento-grpctest-phpservice:0.1
-#          imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mage-grpc-phpserver-db-deployment
+  labels:
+    app: mage-grpc-phpserver-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mage-grpc-phpserver-db
+  template:
+    metadata:
+      labels:
+        app: mage-grpc-phpserver-db
+    spec:
+      containers:
+        - name: mage-grpc-phpserver-db-container-kube
+          image: ogorkunad/magento-grpctest-db:0.1
+          imagePullPolicy: Always
+          ports:
+            - name: tcp
+              containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-phpserver-db
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      protocol: TCP
+      name: tcp
+      targetPort: 5432
+  selector:
+    app: mage-grpc-phpserver-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mage-grpc-phpserver-deployment
+  labels:
+    app: mage-grpc-phpserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mage-grpc-phpserver
+  template:
+    metadata:
+      labels:
+        app: mage-grpc-phpserver
+    spec:
+      containers:
+        - name: mage-grpc-phpserver-container-kube
+          image: ogorkunad/magento-grpctest-phpservice:0.2
+          imagePullPolicy: Always
 #          command: [ "/bin/bash", "-c", "--" ]
 #          args: [ "while true; service ssh start; do sleep 30; done;" ]
-#          ports:
-#            - name: grpc
-#              containerPort: 50051
-#            - name: ssh
-#              containerPort: 22
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: mage-grpc-phpserver
-#spec:
-#  type: ClusterIP
-#  ports:
-#    - port: 9000
-#      protocol: TCP
-#      name: grpc
-#      targetPort: 50051
-#  selector:
-#    app: mage-grpc-phpserver
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: mage-grpc-phpserver-ssh
-#spec:
-#  type: LoadBalancer
-#  ports:
-#    - port: 22223
-#      protocol: TCP
-#      name: ssh
-#      targetPort: 22
-#  selector:
-#    app: mage-grpc-phpserver
+          ports:
+            - name: grpc
+              containerPort: 50051
+            - name: ssh
+              containerPort: 22
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-phpserver
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      protocol: TCP
+      name: grpc
+      targetPort: 50051
+  selector:
+    app: mage-grpc-phpserver
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-phpserver-ssh
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 22223
+      protocol: TCP
+      name: ssh
+      targetPort: 22
+  selector:
+    app: mage-grpc-phpserver
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -209,60 +209,60 @@ spec:
       targetPort: 9000
   selector:
     app: mage-grpc-javaserver
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: mage-grpc-javaserver-debug
-#spec:
-#  type: LoadBalancer
-#  ports:
-#    - port: 5005
-#      protocol: TCP
-#      name: debug
-#      targetPort: 5005
-#  selector:
-#    app: mage-grpc-javaserver
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: grpc-ui-deployment
-  labels:
-    app: grpc-ui
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: grpc-ui
-  template:
-    metadata:
-      labels:
-        app: grpc-ui
-    spec:
-      containers:
-        - name: grpc-ui-kube
-          image: ogorkunad/magento-grpctest-grpcclient:0.2
-          imagePullPolicy: Always
-          command: ["/bin/grpcui", "-plaintext", "-bind=0.0.0.0", "-port=8080", "-import-path=/etc/magento/proto", "-proto=magegrpc.proto"]
-          args: ["mage-grpc-javaserver:9000"]
-          ports:
-            - name: http
-              containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: grpc-ui
+  name: mage-grpc-javaserver-debug
 spec:
   type: LoadBalancer
   ports:
-    - port: 8082
+    - port: 5005
       protocol: TCP
-      name: http
-      targetPort: 8080
+      name: debug
+      targetPort: 5005
   selector:
-    app: grpc-ui
+    app: mage-grpc-javaserver
+#---
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: grpc-ui-deployment
+#  labels:
+#    app: grpc-ui
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: grpc-ui
+#  template:
+#    metadata:
+#      labels:
+#        app: grpc-ui
+#    spec:
+#      containers:
+#        - name: grpc-ui-kube
+#          image: ogorkunad/magento-grpctest-grpcclient:0.2
+#          imagePullPolicy: Always
+#          command: ["/bin/grpcui", "-plaintext", "-bind=0.0.0.0", "-port=8080", "-import-path=/etc/magento/proto", "-proto=magegrpc.proto"]
+#          args: ["mage-grpc-phpserver:9000"]
+#          ports:
+#            - name: http
+#              containerPort: 8080
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: grpc-ui
+#spec:
+#  type: LoadBalancer
+#  ports:
+#    - port: 8082
+#      protocol: TCP
+#      name: http
+#      targetPort: 8080
+#  selector:
+#    app: grpc-ui
 # Catalog Storefront 
 #---
 #apiVersion: apps/v1

@@ -51,17 +51,19 @@ class Products extends JobHandler
                         'finished' => false,
                         'success' => true,
                         'error_msg' => '',
-                        'id' => $product->getId(),
-                        'sku' => $product->getSku(),
-                        'price' => $product->getPrice(),
-                        'title' => $product->getTitle(),
-                        'description' => $product->getDescription(),
-                        'img_url' => $product->getImgUrl(),
-                        'available' => $product->isAvailable(),
-                        'options' => []
+                        'product' => [
+                            'id' => $product->getId(),
+                            'sku' => $product->getSku(),
+                            'price' => $product->getPrice(),
+                            'title' => $product->getTitle(),
+                            'description' => $product->getDescription(),
+                            'img_url' => $product->getImgUrl(),
+                            'available' => $product->isAvailable(),
+                            'options' => []
+                        ]
                     ];
                     foreach ($product->getOptions() as $option) {
-                        $data['options'][] = [
+                        $data['product']['options'][] = [
                             'id' => $option->getId(),
                             'title' => $option->getTitle(),
                             'price' => $option->getPrice(),
