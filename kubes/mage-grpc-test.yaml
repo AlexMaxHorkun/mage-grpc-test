@@ -117,20 +117,20 @@ spec:
       targetPort: 50051
   selector:
     app: mage-grpc-phpserver
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mage-grpc-phpserver-ssh
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 22223
-      protocol: TCP
-      name: ssh
-      targetPort: 22
-  selector:
-    app: mage-grpc-phpserver
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: mage-grpc-phpserver-ssh
+#spec:
+#  type: LoadBalancer
+#  ports:
+#    - port: 22223
+#      protocol: TCP
+#      name: ssh
+#      targetPort: 22
+#  selector:
+#    app: mage-grpc-phpserver
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -209,20 +209,20 @@ spec:
       targetPort: 9000
   selector:
     app: mage-grpc-javaserver
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mage-grpc-javaserver-debug
-spec:
-  type: LoadBalancer
-  ports:
-    - port: 5005
-      protocol: TCP
-      name: debug
-      targetPort: 5005
-  selector:
-    app: mage-grpc-javaserver
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: mage-grpc-javaserver-debug
+#spec:
+#  type: LoadBalancer
+#  ports:
+#    - port: 5005
+#      protocol: TCP
+#      name: debug
+#      targetPort: 5005
+#  selector:
+#    app: mage-grpc-javaserver
 #---
 #apiVersion: apps/v1
 #kind: Deployment
