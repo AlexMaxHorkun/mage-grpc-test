@@ -25,8 +25,12 @@ public class Measurement {
             }
         });
         var size = responses.size();
+        var p90Index = (int) (size* 0.90) - 1;
+        if (p90Index < 0) {
+            p90Index = 0;
+        }
 
-        return new Measurement(total.toMillis(), size, responses.get((int) (size* 0.95) - 1).toMillis(),
+        return new Measurement(total.toMillis(), size, responses.get(p90Index).toMillis(),
                 responses.get(size - 1).toMillis(), responses.get(0).toMillis());
     }
 

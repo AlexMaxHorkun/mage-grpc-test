@@ -161,22 +161,22 @@ public class ServerTest {
         var resp = new GenerateResponse();
         try {
             resp.setPhpClientTime(phpClient.callGenerate(false, count, connections));
-        } catch (Throwable ex) { /* Ignore */ }
+        } catch (Throwable ex) { logger.error("[TEST Generate PHP]", ex); }
         try {
             resp.setPhpAsyncClientTime(phpClient.callGenerate(true, count, connections));
-        } catch (Throwable ex) { /* Ignore */ }
+        } catch (Throwable ex) { logger.error("[TEST Generate PHP ASYNC]", ex); }
         try {
             resp.setJavaClientTime(javaClient.callGenerate(false, count, connections));
-        } catch (Throwable ex) { /* Ignore */ }
+        } catch (Throwable ex) { logger.error("[TEST Generate JAVA]", ex); }
         try {
             resp.setJavaAsyncClientTime(javaClient.callGenerate(true, count, connections));
-        } catch (Throwable ex) { /* Ignore */ }
+        } catch (Throwable ex) { logger.error("[TEST Generate JAVA ASYNC]", ex); }
         try {
             resp.setMageClientTime(mageClient.callGenerate(false, count, connections));
-        } catch (Throwable ex) { /* Ignore */ }
+        } catch (Throwable ex) { logger.error("[TEST Generate MAGENTO]", ex); }
         try {
             resp.setMageAsyncClientTime(mageClient.callGenerate(true, count, connections));
-        } catch (Throwable ex) { /* Ignore */ }
+        } catch (Throwable ex) { logger.error("[TEST Generate MAGENTO ASYNC]", ex); }
 
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }

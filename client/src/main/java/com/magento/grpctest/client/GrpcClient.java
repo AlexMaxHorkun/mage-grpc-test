@@ -247,6 +247,9 @@ public final class GrpcClient {
         }
 
         //Validating responses
+        if (items.size() != number * connections) {
+            throw new RuntimeException("Invalid number of products returned");
+        }
         validateProductsReceived(items);
 
         return Measurement.from(Duration.between(started, finished), responseMeasurements);
