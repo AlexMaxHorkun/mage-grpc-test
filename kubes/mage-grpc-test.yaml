@@ -287,7 +287,7 @@ spec:
           imagePullPolicy: Always
 #          imagePullPolicy: Never
 #          command: ["sh", "-c", "service ssh start; php-fpm -R"]
-          command: ["sh", "-c", "./vendor/bin/grpc-server"]
+#          command: ["sh", "-c", "./vendor/bin/grpc-server"]
           ports:
             - name: grpc
               containerPort: 9001
