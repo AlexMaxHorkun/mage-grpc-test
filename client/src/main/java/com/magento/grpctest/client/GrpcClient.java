@@ -1,5 +1,6 @@
 package com.magento.grpctest.client;
 
+import com.magento.grpctest.client.data.Measurement;
 import com.magento.grpctest.def.Magegrpc;
 import com.magento.grpctest.def.ProductsGrpc;
 import io.grpc.ManagedChannel;
@@ -8,15 +9,32 @@ import io.grpc.stub.StreamObserver;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 public final class GrpcClient {
     private final String uri;
 
     private final Integer port;
+
+    private final static class CallResult {
+        private final Set<Magegrpc.Product> products;
+
+        private final Duration duration;
+
+        public CallResult(Set<Magegrpc.Product> products, Duration duration) {
+            this.products = products;
+            this.duration = duration;
+        }
+
+        public Set<Magegrpc.Product> getProducts() {
+            return products;
+        }
+
+        public Duration getDuration() {
+            return duration;
+        }
+    }
 
     private final static class GeneratedObserver implements StreamObserver<Magegrpc.Product> {
         private final CompletableFuture<Set<Magegrpc.Product>> future = new CompletableFuture<>();
@@ -50,7 +68,7 @@ public final class GrpcClient {
 
         private final boolean async;
 
-        private final CompletableFuture<Set<Magegrpc.Product>> future = new CompletableFuture<>();
+        private final CompletableFuture<CallResult> future = new CompletableFuture<>();
 
         public GenerateClient(int count, boolean async) {
             this.count = count;
@@ -63,10 +81,12 @@ public final class GrpcClient {
             try {
                 channel = createChannel();
                 var prodService = ProductsGrpc.newStub(channel);
+                var started = LocalDateTime.now();
                 var responseObserver = new GeneratedObserver();
                 prodService.generate(Magegrpc.GenerateArg.newBuilder().setNumber(count).setAsync(async).build(),
                         responseObserver);
-                future.complete(responseObserver.getFuture().get());
+                var received = responseObserver.getFuture().get();
+                future.complete(new CallResult(received, Duration.between(started, LocalDateTime.now())));
             } catch (Throwable ex) {
                 future.completeExceptionally(ex);
             } finally {
@@ -76,19 +96,17 @@ public final class GrpcClient {
             }
         }
 
-        public Future<Set<Magegrpc.Product>> getFuture() {
+        public Future<CallResult> getFuture() {
             return future;
         }
     }
 
     private final static class ReadObserver implements StreamObserver<Magegrpc.ReadResponse> {
-        private final CompletableFuture<Magegrpc.ReadResponse> future;
+        private final CompletableFuture<Magegrpc.ReadResponse> future = new CompletableFuture<>();
 
         private Magegrpc.ReadResponse received;
 
-        public ReadObserver(CompletableFuture<Magegrpc.ReadResponse> future) {
-            this.future = future;
-        }
+        public ReadObserver() {}
 
         @Override
         public void onNext(Magegrpc.ReadResponse readResponse) {
@@ -104,12 +122,16 @@ public final class GrpcClient {
         public void onCompleted() {
             future.complete(received);
         }
+
+        public Future<Magegrpc.ReadResponse> getFuture() {
+            return future;
+        }
     }
 
     private final class ReadClient implements Runnable {
         private final Integer number;
 
-        private final CompletableFuture<Magegrpc.ReadResponse> future = new CompletableFuture<>();
+        private final CompletableFuture<CallResult> future = new CompletableFuture<>();
 
         public ReadClient(Integer number) {
             this.number = number;
@@ -120,18 +142,22 @@ public final class GrpcClient {
             var channel = createChannel();
             try {
                 var service = ProductsGrpc.newStub(channel);
-                service.read(Magegrpc.ReadRequest.newBuilder().setN(number).build(), new ReadObserver(future));
+                var observer = new ReadObserver();
+                var readFuture = observer.getFuture();
+                var started = LocalDateTime.now();
+                service.read(Magegrpc.ReadRequest.newBuilder().setN(number).build(), observer);
                 try {
-                    future.get();
+                    future.complete(new CallResult(new HashSet<>(readFuture.get().getItemsList()),
+                            Duration.between(started, LocalDateTime.now())));
                 } catch (Throwable ex) {
-                    //Ignore, let the main class decide.
+                    future.completeExceptionally(ex);
                 }
             } finally {
                 channel.shutdown();
             }
         }
 
-        public Future<Magegrpc.ReadResponse> getFuture() {
+        public Future<CallResult> getFuture() {
             return future;
         }
     }
@@ -141,23 +167,25 @@ public final class GrpcClient {
         this.port = port;
     }
 
-    public Duration callGenerate(boolean async, int count, int connectionsCount) {
-        var callResults = new HashSet<Future<Set<Magegrpc.Product>>>();
+    public Measurement callGenerate(boolean async, int count, int connectionsCount) {
+        var responseFutures = new HashSet<Future<CallResult>>();
         var executor = Executors.newFixedThreadPool(Math.min(connectionsCount, 16));
         var started = LocalDateTime.now();
         //Calling clients
         for (int i = 0; i < connectionsCount; i++) {
             var client = new GenerateClient(count, async);
             executor.submit(client);
-            callResults.add(client.getFuture());
+            responseFutures.add(client.getFuture());
         }
         executor.shutdown();
 
         //Waiting for results
         var results = new HashSet<Set<Magegrpc.Product>>();
+        var responseMeasurements = new LinkedList<Duration>();
         try {
-            for (var future : callResults) {
-                results.add(future.get());
+            for (var future : responseFutures) {
+                results.add(future.get().getProducts());
+                responseMeasurements.add(future.get().getDuration());
             }
         } catch (InterruptedException ex) {
             throw new RuntimeException("Failed to wait for threads", ex);
@@ -176,7 +204,7 @@ public final class GrpcClient {
             validateProductsReceived(result);
         }
 
-        return Duration.between(started, finished);
+        return Measurement.from(Duration.between(started, finished), responseMeasurements);
     }
 
     public void clear() {
@@ -189,9 +217,10 @@ public final class GrpcClient {
         }
     }
 
-    public Duration callRead(int number, int connections) {
-        var responsePromises = new LinkedList<Future<Magegrpc.ReadResponse>>();
-        var responses = new LinkedList<Magegrpc.Product>();
+    public Measurement callRead(int number, int connections) {
+        var responsePromises = new LinkedList<Future<CallResult>>();
+        var items = new LinkedList<Magegrpc.Product>();
+        var responseMeasurements = new HashSet<Duration>();
         var executor = Executors.newFixedThreadPool(16);
         var started = LocalDateTime.now();
 
@@ -206,7 +235,8 @@ public final class GrpcClient {
         Throwable readerException = null;
         for (var promise : responsePromises) {
             try {
-                responses.addAll(promise.get().getItemsList());
+                items.addAll(promise.get().getProducts());
+                responseMeasurements.add(promise.get().getDuration());
             } catch (Throwable ex) {
                 readerException = ex;
             }
@@ -217,9 +247,9 @@ public final class GrpcClient {
         }
 
         //Validating responses
-        validateProductsReceived(responses);
+        validateProductsReceived(items);
 
-        return Duration.between(started, finished);
+        return Measurement.from(Duration.between(started, finished), responseMeasurements);
     }
 
     private ManagedChannel createChannel() {

@@ -1,5 +1,6 @@
 package com.magento.grpctest.client;
 
+import com.magento.grpctest.client.data.Measurement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,65 +17,65 @@ import java.time.Duration;
 @RequestMapping("/")
 public class ServerTest {
     public static class GenerateResponse {
-        private Duration phpClientTime;
+        private Measurement phpClientTime;
 
-        private Duration phpAsyncClientTime;
+        private Measurement phpAsyncClientTime;
 
-        private Duration javaClientTime;
+        private Measurement javaClientTime;
 
-        private Duration javaAsyncClientTime;
+        private Measurement javaAsyncClientTime;
 
-        private Duration mageClientTime;
+        private Measurement mageClientTime;
 
-        private Duration mageAsyncClientTime;
+        private Measurement mageAsyncClientTime;
 
         public GenerateResponse() { }
 
-        public Duration getPhpClientTime() {
+        public Measurement getPhpClientTime() {
             return phpClientTime;
         }
 
-        public void setPhpClientTime(Duration phpClientTime) {
+        public void setPhpClientTime(Measurement phpClientTime) {
             this.phpClientTime = phpClientTime;
         }
 
-        public Duration getJavaClientTime() {
+        public Measurement getJavaClientTime() {
             return javaClientTime;
         }
 
-        public void setJavaClientTime(Duration javaClientTime) {
+        public void setJavaClientTime(Measurement javaClientTime) {
             this.javaClientTime = javaClientTime;
         }
 
-        public Duration getJavaAsyncClientTime() {
+        public Measurement getJavaAsyncClientTime() {
             return javaAsyncClientTime;
         }
 
-        public void setJavaAsyncClientTime(Duration javaAsyncClientTime) {
+        public void setJavaAsyncClientTime(Measurement javaAsyncClientTime) {
             this.javaAsyncClientTime = javaAsyncClientTime;
         }
 
-        public Duration getMageClientTime() {
+        public Measurement getMageClientTime() {
             return mageClientTime;
         }
 
-        public void setMageClientTime(Duration mageClientTime) {
+        public void setMageClientTime(Measurement mageClientTime) {
             this.mageClientTime = mageClientTime;
         }
 
-        public Duration getMageAsyncClientTime() {
+        public Measurement getMageAsyncClientTime() {
             return mageAsyncClientTime;
         }
 
-        public void setMageAsyncClientTime(Duration mageAsyncClientTime) {
+        public void setMageAsyncClientTime(Measurement mageAsyncClientTime) {
             this.mageAsyncClientTime = mageAsyncClientTime;
         }
 
-        public Duration getPhpAsyncClientTime() {
+        public Measurement getPhpAsyncClientTime() {
             return phpAsyncClientTime;
         }
 
-        public void setPhpAsyncClientTime(Duration phpAsyncClientTime) {
+        public void setPhpAsyncClientTime(Measurement phpAsyncClientTime) {
             this.phpAsyncClientTime = phpAsyncClientTime;
         }
     }
@@ -106,29 +107,29 @@ public class ServerTest {
     }
 
     public static class ReadResponse {
-        private Duration phpReadTime;
+        private Measurement phpReadTime;
 
-        private Duration javaReadTime;
+        private Measurement javaReadTime;
 
-        private Duration mageReadTime;
+        private Measurement mageReadTime;
 
         public ReadResponse() {}
 
-        public ReadResponse(Duration phpReadTime, Duration javaReadTime, Duration mageReadTime) {
+        public ReadResponse(Measurement phpReadTime, Measurement javaReadTime, Measurement mageReadTime) {
             this.phpReadTime = phpReadTime;
             this.javaReadTime = javaReadTime;
             this.mageReadTime = mageReadTime;
         }
 
-        public Duration getPhpReadTime() {
+        public Measurement getPhpReadTime() {
             return phpReadTime;
         }
 
-        public Duration getJavaReadTime() {
+        public Measurement getJavaReadTime() {
             return javaReadTime;
         }
 
-        public Duration getMageReadTime() {
+        public Measurement getMageReadTime() {
             return mageReadTime;
         }
     }
@@ -210,9 +211,9 @@ public class ServerTest {
     @GetMapping(value = "invoke-read")
     public ResponseEntity<ReadResponse> read(@Valid @NotNull @Min(1) @RequestParam("number") Integer number,
                                              @Valid @NotNull @Min(1) @RequestParam("connections") Integer connections) {
-        Duration phpReadResult = null;
-        Duration javaReadResult = null;
-        Duration mageReadResult = null;
+        Measurement phpReadResult = null;
+        Measurement javaReadResult = null;
+        Measurement mageReadResult = null;
         try {
             phpReadResult = phpClient.callRead(number, connections);
         } catch (Throwable ex) {

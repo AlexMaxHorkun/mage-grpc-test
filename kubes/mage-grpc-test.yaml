@@ -213,7 +213,7 @@ spec:
 #apiVersion: v1
 #kind: Service
 #metadata:
-#  name: mage-grpc-javaserver-debug
+#  name: mage-grpc-java-debug
 #spec:
 #  type: LoadBalancer
 #  ports:
@@ -222,7 +222,7 @@ spec:
 #      name: debug
 #      targetPort: 5005
 #  selector:
-#    app: mage-grpc-javaserver
+#    app: mage-grpc-client
 #---
 #apiVersion: apps/v1
 #kind: Deployment
