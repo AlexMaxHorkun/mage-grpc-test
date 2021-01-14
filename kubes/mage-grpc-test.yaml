@@ -264,95 +264,95 @@ spec:
 #  selector:
 #    app: grpc-ui
 # Catalog Storefront 
-#---
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: catalogstorefront-deployment
-#  labels:
-#    app: catalog-storefront
-#spec:
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: catalogstorefront
-#  template:
-#    metadata:
-#      labels:
-#        app: catalogstorefront
-#    spec:
-#      containers:
-#        - name: catalogstorefront-php-with-rr
-#          image: mslabko/mage-grpc-test-cataog:latest
-#          imagePullPolicy: Always
-##          imagePullPolicy: Never
-##          command: ["sh", "-c", "service ssh start; php-fpm -R"]
-#          ports:
-#            - name: grpc
-#              containerPort: 9001
-#            - name: ssh
-#              containerPort: 22
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: catalogstorefront
-#spec:
-#  type: ClusterIP
-#  ports:
-#    - port: 9001
-#      protocol: TCP
-#      name: grpc
-#      targetPort: 9001
-#  selector:
-#    app: catalogstorefront
-#---
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  name: mage-grpc-elastic-deployment
-#  labels:
-#    app: mage-grpc-elastic
-#spec:
-#  replicas: 1
-#  selector:
-#    matchLabels:
-#      app: mage-grpc-elastic
-#  template:
-#    metadata:
-#      labels:
-#        app: mage-grpc-elastic
-#    spec:
-#      containers:
-#        - name: mage-grpc-elastic-container-kube
-#          image: elasticsearch:7.9.3
-#          imagePullPolicy: Always
-#          ports:
-#            - name: tcp
-#              containerPort: 9200
-#          env:
-#            - name: ES_JAVA_OPTS
-#              value: "-Xms512m -Xmx512m"
-#            - name: cluster.name
-#              value: "docker-cluster"
-#            - name: discovery.type
-#              value: "single-node"
-#            - name: bootstrap.memory_lock
-#              value: "true"
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  name: mage-grpc-elastic
-#spec:
-#  type: ClusterIP
-#  ports:
-#    - port: 9200
-#      protocol: TCP
-#      name: tcp
-#      targetPort: 9200
-#  selector:
-#    app: mage-grpc-elastic
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalogstorefront-deployment
+  labels:
+    app: catalog-storefront
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalogstorefront
+  template:
+    metadata:
+      labels:
+        app: catalogstorefront
+    spec:
+      containers:
+        - name: catalogstorefront-php-with-rr
+          image: mslabko/mage-grpc-test-cataog:latest
+          imagePullPolicy: Always
+#          imagePullPolicy: Never
+#          command: ["sh", "-c", "service ssh start; php-fpm -R"]
+          ports:
+            - name: grpc
+              containerPort: 9001
+            - name: ssh
+              containerPort: 22
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalogstorefront
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9001
+      protocol: TCP
+      name: grpc
+      targetPort: 9001
+  selector:
+    app: catalogstorefront
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mage-grpc-elastic-deployment
+  labels:
+    app: mage-grpc-elastic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mage-grpc-elastic
+  template:
+    metadata:
+      labels:
+        app: mage-grpc-elastic
+    spec:
+      containers:
+        - name: mage-grpc-elastic-container-kube
+          image: elasticsearch:7.9.3
+          imagePullPolicy: Always
+          ports:
+            - name: tcp
+              containerPort: 9200
+          env:
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+            - name: cluster.name
+              value: "docker-cluster"
+            - name: discovery.type
+              value: "single-node"
+            - name: bootstrap.memory_lock
+              value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-elastic
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9200
+      protocol: TCP
+      name: tcp
+      targetPort: 9200
+  selector:
+    app: mage-grpc-elastic
 #---
 #apiVersion: apps/v1
 #kind: Deployment
