@@ -1,4 +1,4 @@
-package magegrpc
+package magento_grpcTestApi_proto
 
 import (
 	"context"

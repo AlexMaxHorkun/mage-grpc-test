@@ -24,7 +24,7 @@ package main
 
 import (
 	rr "github.com/spiral/roadrunner/cmd/rr/cmd"
-	"main/magegrpc"
+	"main/magento_grpcTestApi_proto"
 
 	// services (plugins)
 	"github.com/spiral/broadcast"
@@ -87,7 +87,7 @@ func main() {
 	// auto reloading
 	rr.Container.Register(reload.ID, &reload.Service{})
 
-	rr.Container.Register(magegrpc.ID, &magegrpc.Service{})
+	rr.Container.Register(magento_grpcTestApi_proto.ID, &magento_grpcTestApi_proto.Service{})
 
 	// you can register additional commands using cmd.CLI
 	rr.Execute()

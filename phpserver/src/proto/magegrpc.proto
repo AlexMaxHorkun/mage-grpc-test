@@ -1,6 +1,6 @@
 syntax = "proto3";
 option java_package = "com.magento.grpctest.def";
-package magegrpc;
+package magento.grpcTestApi.proto;
 
 //DTOs
 message GenerateArg {
