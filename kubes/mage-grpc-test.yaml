@@ -263,7 +263,7 @@ spec:
 #      targetPort: 8080
 #  selector:
 #    app: grpc-ui
-# Catalog Storefront 
+# Catalog Storefront
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -287,6 +287,7 @@ spec:
           imagePullPolicy: Always
 #          imagePullPolicy: Never
 #          command: ["sh", "-c", "service ssh start; php-fpm -R"]
+          command: ["sh", "-c", "./vendor/bin/grpc-server"]
           ports:
             - name: grpc
               containerPort: 9001
