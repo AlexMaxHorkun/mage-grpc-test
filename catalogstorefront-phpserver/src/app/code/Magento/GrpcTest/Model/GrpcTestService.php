@@ -117,6 +117,7 @@ class GrpcTestService implements ProductsServerInterface
                 $options = [];
                 for ($j = 1; $j <= 10; $j++) {
                     $option = [
+                        'id' => $j,
                         'title' => sprintf('Option #%d', $j),
                         'price' => (float)random_int(1, 10000),
                         'available' => true
