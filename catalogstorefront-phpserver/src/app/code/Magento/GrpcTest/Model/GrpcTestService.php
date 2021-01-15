@@ -163,7 +163,7 @@ class GrpcTestService implements ProductsServerInterface
         $start = random_int(0, $startMax);
 
         $rawItems = $this->dataProvider->fetch(
-            range($start, $start + $productsN - 1),
+            range($start, $start + $productsN),
             ['sku', 'id', 'price', 'title', 'description', 'image_url', 'available', 'options'],
             ['store' => self::STORE_CODE]
         );
