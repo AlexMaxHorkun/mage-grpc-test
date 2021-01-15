@@ -1,0 +1,1 @@
+{"phpReadTime":{"totalMs":41290,"totalRequests":16,"p90Ms":35607,"slowestMs":40760,"fastestMs":31679},"javaReadTime":{"totalMs":1118,"totalRequests":16,"p90Ms":820,"slowestMs":1053,"fastestMs":258},"mageReadTime":{"totalMs":3766,"totalRequests":16,"p90Ms":1893,"slowestMs":3750,"fastestMs":980}}

@@ -1,0 +1,23 @@
+{
+  "phpReadTime": {
+    "totalMs": 27119,
+    "totalRequests": 16,
+    "p90Ms": 25867,
+    "slowestMs": 26724,
+    "fastestMs": 23740
+  },
+  "javaReadTime": {
+    "totalMs": 560,
+    "totalRequests": 16,
+    "p90Ms": 351,
+    "slowestMs": 369,
+    "fastestMs": 93
+  },
+  "mageReadTime": {
+    "totalMs": 2023,
+    "totalRequests": 16,
+    "p90Ms": 1779,
+    "slowestMs": 1879,
+    "fastestMs": 768
+  }
+}
