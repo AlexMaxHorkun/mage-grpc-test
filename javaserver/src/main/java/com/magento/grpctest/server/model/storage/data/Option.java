@@ -9,7 +9,7 @@ public class Option {
     @Id
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prod_id", nullable = false)
     private Product product;
 

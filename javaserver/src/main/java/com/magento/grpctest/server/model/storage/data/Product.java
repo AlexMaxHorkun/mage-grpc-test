@@ -22,7 +22,7 @@ public class Product {
 
     private Boolean available;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product", fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product", fetch = FetchType.LAZY)
     private Set<Option> options;
 
     public Product() {}

@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -41,8 +42,12 @@ public class ProductRepo {
 
     private final SecureRandom rand = new SecureRandom();
 
-    public ProductRepo(@Autowired CrudProductRepo crudRepo, @Autowired Persister persister) {
+    private final CrudOptionRepo optionRepo;
+
+    public ProductRepo(@Autowired CrudProductRepo crudRepo, @Autowired CrudOptionRepo optionRepo,
+                       @Autowired Persister persister) {
         this.crudRepo = crudRepo;
+        this.optionRepo = optionRepo;
         this.persister = persister;
     }
 
@@ -90,10 +95,18 @@ public class ProductRepo {
         if (count <= limit) {
             page = 1;
         } else {
-            page = rand.nextInt(count / limit + ((count % limit == 0) ? 0 : 1) + 1);
+            page = rand.nextInt(count / limit + ((count % limit == 0) ? 0 : 1));
         }
 
-        return crudRepo.findAll(PageRequest.of(page, limit)).getContent();
+        var products = crudRepo.findAll(PageRequest.of(page, limit)).getContent()
+                .stream().collect(Collectors.toMap(Product::getId, p -> p));
+        products.forEach((id, p) -> p.setOptions(new HashSet<>()));
+        var options = optionRepo.findByProduct_IdInOrderByProductIdAsc(products.keySet());
+        for (var option : options) {
+            products.get(option.getProduct().getId()).getOptions().add(option);
+        }
+
+        return new ArrayList<>(products.values());
     }
 
     private <T> T extractFutureResult(Future<T> future) {
