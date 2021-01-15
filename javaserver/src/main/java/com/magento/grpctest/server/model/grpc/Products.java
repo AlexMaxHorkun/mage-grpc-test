@@ -170,10 +170,7 @@ public class Products extends ProductsGrpc.ProductsImplBase {
     public void read(Magegrpc.ReadRequest request, StreamObserver<Magegrpc.ReadResponse> responseObserver) {
         var response = Magegrpc.ReadResponse.newBuilder();
         try {
-            var found = manager.find(request.getN());
-            for (var prod : found) {
-                response.addItems(createProductOf(prod));
-            }
+            manager.find(request.getN()).forEach(p -> response.addItems(createProductOf(p)));
         } catch (Throwable ex) {
             responseObserver.onError(ex);
             logger.error("[GRPC] Read operation error", ex);
