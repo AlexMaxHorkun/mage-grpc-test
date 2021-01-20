@@ -45,23 +45,22 @@ apt install -yqf\
     php7.4-soap\
     php7.4-xml\
     php7.4-bcmath\
-    php7.4-xdebug\
     php7.4-curl\
     php7.4-zip\
     php7.4-mbstring\
     php7.4-gd\
     php7.4-intl\
     php7.4-dev
-sed -i 's/memory_limit = 128M/memory_limit = 4096M/' /etc/php/7.4/fpm/php.ini
-sed -i 's/max_execution_time = 30/max_execution_time = 18000/' /etc/php/7.4/fpm/php.ini
+sed -i 's/memory_limit = 128M/memory_limit = 256M/' /etc/php/7.4/fpm/php.ini
+sed -i 's/max_execution_time = 30/max_execution_time = 0/' /etc/php/7.4/fpm/php.ini
 sed -i 's/zlib.output_compression = Off/zlib.output_compression = on/' /etc/php/7.4/fpm/php.ini
-sed -i 's/max_execution_time = 30/max_execution_time = 18000/' /etc/php/7.4/cli/php.ini
-cp /etc/magento/xdebug.ini /etc/php/7.4/mods-available/
+sed -i 's/max_execution_time = 30/max_execution_time = 0/' /etc/php/7.4/cli/php.ini
+#cp /etc/magento/xdebug.ini /etc/php/7.4/mods-available/
 echo 'PHP_IDE_CONFIG="serverName=grpc.mage.ua"' >> /etc/environment
 php -r "copy('https://getcomposer.org/composer-1.phar', 'composer.phar');" &&\
 chmod +x composer.phar
 mv composer.phar /usr/local/bin/composer
-apt install -yqf redis-server redis-tools
+apt install -yqf redis-tools
 #Installing PHP app
 cd /var/www/magento
 rm go.sum

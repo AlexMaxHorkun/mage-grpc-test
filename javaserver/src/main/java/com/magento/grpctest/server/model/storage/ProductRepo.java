@@ -85,7 +85,6 @@ public class ProductRepo {
         crudRepo.deleteProducts();
     }
 
-    @Transactional
     public List<Product> findAll(int limit) {
         if (limit < 1) {
             throw new IllegalArgumentException("Invalid limit provided");
@@ -102,7 +101,7 @@ public class ProductRepo {
         var products = crudRepo.findAll(PageRequest.of(page, limit)).getContent()
                 .stream().collect(Collectors.toMap(Product::getId, p -> p));
         products.forEach((id, p) -> p.setOptions(new HashSet<>()));
-        var options = optionRepo.findByProduct_IdInOrderByProductIdAsc(products.keySet());
+        var options = optionRepo.findByProductIds(products.keySet());
         for (var option : options) {
             products.get(option.getProduct().getId()).getOptions().add(option);
         }

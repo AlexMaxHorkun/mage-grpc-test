@@ -31,13 +31,13 @@ class App extends Kernel
         Framework\Security\EncrypterBootloader::class,
 
         // Databases
-        Framework\Database\DatabaseBootloader::class,
+       /* Framework\Database\DatabaseBootloader::class,
         Framework\Database\MigrationsBootloader::class,
 
         // ORM
         Framework\Cycle\CycleBootloader::class,
         Framework\Cycle\ProxiesBootloader::class,
-        Framework\Cycle\AnnotatedBootloader::class,
+        Framework\Cycle\AnnotatedBootloader::class,*/
 
         // Dispatchers
         Framework\GRPC\GRPCBootloader::class,

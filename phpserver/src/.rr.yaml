@@ -15,7 +15,7 @@ jobs:
 
   workers:
     command: "php app.php"
-    pool.numWorkers: 4
+    pool.numWorkers: 8
 
 # control the max memory usage
 limit:
@@ -25,6 +25,6 @@ limit:
 broadcast:
   # optional, redis broker configuration
   redis:
-    addr:      "localhost:6379"
+    addr:      "mage-grpc-phpserver-redis:6379"
     password: ""
     db:        0
