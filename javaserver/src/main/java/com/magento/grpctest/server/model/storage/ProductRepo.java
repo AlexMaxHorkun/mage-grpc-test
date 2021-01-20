@@ -85,6 +85,7 @@ public class ProductRepo {
         crudRepo.deleteProducts();
     }
 
+    @Transactional
     public List<Product> findAll(int limit) {
         if (limit < 1) {
             throw new IllegalArgumentException("Invalid limit provided");
