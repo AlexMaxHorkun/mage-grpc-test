@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface CrudOptionRepo extends CrudRepository<Option, UUID> {
     @Query(value = "SELECT o FROM Option o WHERE o.product.id in (:ids) ORDER BY o.product.id")
     List<Option> findByProductIds(@Param("ids") Collection<UUID> productIds);
+
+    List<Option> findByProduct_IdInOrderByProductIdAsc(Collection<UUID> productIds);
 }

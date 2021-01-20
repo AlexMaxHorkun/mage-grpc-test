@@ -102,7 +102,7 @@ public class ProductRepo {
         var products = crudRepo.findAll(PageRequest.of(page, limit)).getContent()
                 .stream().collect(Collectors.toMap(Product::getId, p -> p));
         products.forEach((id, p) -> p.setOptions(new HashSet<>()));
-        var options = optionRepo.findByProductIds(products.keySet());
+        var options = optionRepo.findByProduct_IdInOrderByProductIdAsc(products.keySet());
         for (var option : options) {
             products.get(option.getProduct().getId()).getOptions().add(option);
         }
