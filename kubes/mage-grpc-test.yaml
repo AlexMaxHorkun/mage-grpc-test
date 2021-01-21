@@ -16,24 +16,26 @@ spec:
     spec:
       containers:
         - name: grpc-testing
-          image: mslabko/grpc-testing-ghz
-          imagePullPolicy: Never
+          # "cloud" tag do not need volumes
+          image: mslabko/grpc-testing-ghz:cloud
+          imagePullPolicy: Always
           tty: true
           command: ["/bin/sh"]
-          volumeMounts:
-            - name: config
-              mountPath: /test/ghz_config.json
-            - name: proto
-              mountPath: /test/test.proto
-      volumes:
-        - name: config
-          hostPath:
-            # TODO: change to absolute path
-            path: ../measurements/ghz_config.json
-        - name: proto
-          hostPath:
-            # TODO: change to absolute path
-            path: ../grpc/src/main/proto/magegrpc.proto
+# uncomment for local testing
+#          volumeMounts:
+#            - name: config
+#              mountPath: /test/ghz_config.json
+#            - name: proto
+#              mountPath: /test/test.proto
+#      volumes:
+#        - name: config
+#          hostPath:
+#            # TODO: change to absolute path
+#            path: ../measurements/ghz_config.json
+#        - name: proto
+#          hostPath:
+#            # TODO: change to absolute path
+#            path: ../grpc/src/main/proto/magegrpc.proto
 ---
 apiVersion: apps/v1
 kind: Deployment
