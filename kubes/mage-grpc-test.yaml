@@ -1,6 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: grpc-testing-deployment
+  labels:
+    app: grpc-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-testing
+  template:
+    metadata:
+      labels:
+        app: grpc-testing
+    spec:
+      containers:
+        - name: grpc-testing
+          image: mslabko/grpc-testing-ghz
+          imagePullPolicy: Never
+          tty: true
+          command: ["/bin/sh"]
+          volumeMounts:
+            - name: config
+              mountPath: /test/ghz_config.json
+            - name: proto
+              mountPath: /test/test.proto
+      volumes:
+        - name: config
+          hostPath:
+            # TODO: change to absolute path
+            path: ../measurements/ghz_config.json
+        - name: proto
+          hostPath:
+            # TODO: change to absolute path
+            path: ../grpc/src/main/proto/magegrpc.proto
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: mage-grpc-client-deployment
   labels:
     app: mage-grpc-client
