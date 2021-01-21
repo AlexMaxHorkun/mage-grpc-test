@@ -3,6 +3,7 @@ COPY src /var/www/magento2ce
 EXPOSE 9000 22
 COPY exec.sh /etc/magento/
 COPY install.sh /etc/magento/
+COPY php.ini /usr/local/etc/php/php.ini
 USER root
 WORKDIR /var/www/magento2ce
 RUN /etc/magento/install.sh
