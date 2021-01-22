@@ -2,22 +2,22 @@
   "phpReadTime": {
     "totalMs": 44341,
     "totalRequests": 16,
-    "p90Ms": 39570,
+    "p90Ms": 36469,
     "slowestMs": 43634,
-    "fastestMs": 31195
+    "fastestMs": 342
   },
   "javaReadTime": {
     "totalMs": 1377,
     "totalRequests": 16,
-    "p90Ms": 817,
+    "p90Ms": 336,
     "slowestMs": 1095,
-    "fastestMs": 258
+    "fastestMs": 83
   },
   "mageReadTime": {
     "totalMs": 4535,
     "totalRequests": 16,
-    "p90Ms": 3776,
+    "p90Ms": 1600,
     "slowestMs": 4481,
-    "fastestMs": 2840
+    "fastestMs": 203
   }
 }

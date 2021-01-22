@@ -1,45 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grpc-testing-deployment
-  labels:
-    app: grpc-testing
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: grpc-testing
-  template:
-    metadata:
-      labels:
-        app: grpc-testing
-    spec:
-      containers:
-        - name: grpc-testing
-          # "cloud" tag do not need volumes
-          image: mslabko/grpc-testing-ghz:cloud
-          imagePullPolicy: Always
-          tty: true
-          command: ["/bin/sh"]
-# uncomment for local testing
-#          volumeMounts:
-#            - name: config
-#              mountPath: /test/ghz_config.json
-#            - name: proto
-#              mountPath: /test/test.proto
-#      volumes:
-#        - name: config
-#          hostPath:
-#            # TODO: change to absolute path
-#            path: ../measurements/ghz_config.json
-#        - name: proto
-#          hostPath:
-#            # TODO: change to absolute path
-#            path: ../grpc/src/main/proto/magegrpc.proto
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: mage-grpc-client-deployment
   labels:
     app: mage-grpc-client
@@ -76,6 +37,44 @@ spec:
       targetPort: 8080
   selector:
     app: mage-grpc-client
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mage-grpc-ghz-deployment
+  labels:
+    app: mage-grpc-ghz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mage-grpc-ghz
+  template:
+    metadata:
+      labels:
+        app: mage-grpc-ghz
+    spec:
+      containers:
+        - name: mage-grpc-ghz-container-kube
+          image: ogorkunad/magento-grpctest-ghz:0.1
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mage-grpc-ghz
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8090
+      protocol: TCP
+      name: http
+      targetPort: 8080
+  selector:
+    app: mage-grpc-ghz
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -478,3 +477,42 @@ spec:
 #      targetPort: 8080
 #  selector:
 #    app: storefront-grpc-ui
+#---
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: grpc-testing-deployment
+#  labels:
+#    app: grpc-testing
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: grpc-testing
+#  template:
+#    metadata:
+#      labels:
+#        app: grpc-testing
+#    spec:
+#      containers:
+#        - name: grpc-testing
+#          # "cloud" tag do not need volumes
+#          image: mslabko/grpc-testing-ghz:cloud
+#          imagePullPolicy: Always
+#          tty: true
+#          command: ["/bin/sh"]
+# uncomment for local testing
+#          volumeMounts:
+#            - name: config
+#              mountPath: /test/ghz_config.json
+#            - name: proto
+#              mountPath: /test/test.proto
+#      volumes:
+#        - name: config
+#          hostPath:
+#            # TODO: change to absolute path
+#            path: ../measurements/ghz_config.json
+#        - name: proto
+#          hostPath:
+#            # TODO: change to absolute path
+#            path: ../grpc/src/main/proto/magegrpc.proto

@@ -1,1 +1,1 @@
-{"phpReadTime":{"totalMs":12629,"totalRequests":16,"p90Ms":12243,"slowestMs":12444,"fastestMs":5211},"javaReadTime":{"totalMs":330,"totalRequests":16,"p90Ms":308,"slowestMs":313,"fastestMs":153},"mageReadTime":{"totalMs":879,"totalRequests":16,"p90Ms":742,"slowestMs":851,"fastestMs":109}}
+{"phpReadTime":{"totalMs":11376,"totalRequests":16,"p90Ms":10378,"slowestMs":11295,"fastestMs":898},"javaReadTime":{"totalMs":255,"totalRequests":16,"p90Ms":240,"slowestMs":253,"fastestMs":152},"mageReadTime":{"totalMs":1507,"totalRequests":16,"p90Ms":1366,"slowestMs":1505,"fastestMs":728}}

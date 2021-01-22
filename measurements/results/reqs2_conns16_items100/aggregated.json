@@ -4,20 +4,20 @@
     "totalRequests": 16,
     "p90Ms": 2822,
     "slowestMs": 2880,
-    "fastestMs": 1257
+    "fastestMs": 413
   },
   "javaReadTime": {
     "totalMs": 341,
     "totalRequests": 16,
     "p90Ms": 320,
     "slowestMs": 332,
-    "fastestMs": 130
+    "fastestMs": 123
   },
   "mageReadTime": {
-    "totalMs": 926,
+    "totalMs": 1057,
     "totalRequests": 16,
-    "p90Ms": 792,
-    "slowestMs": 892,
+    "p90Ms": 953,
+    "slowestMs": 1047,
     "fastestMs": 117
   }
 }
