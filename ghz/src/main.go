@@ -95,39 +95,35 @@ func doTest(w http.ResponseWriter, req * http.Request) {
 		writeError(w, "Provide duration in seconds")
 		return
 	}
+	cpus, err := strconv.ParseUint(req.URL.Query().Get("cpus"), 10, 0)
+	if err != nil {
+		cpus = 4
+	}
+	options := []runner.Option{
+		runner.WithProtoFile("magegrpc.proto", []string{}),
+		runner.WithConcurrency(uint(threads)),
+		runner.WithRunDuration(duration),
+		runner.WithDurationStopAction("ignore"),
+		runner.WithSkipFirst(10),
+		runner.WithInsecure(true),
+		runner.WithData(GrpcRequest{N: int32(prod)}),
+		runner.WithCPUs(uint(cpus)),
+	}
 
 	phpReport, phpErr := runner.Run(
 		"magento.grpcTestApi.proto.Products.read",
 		"mage-grpc-phpserver:9000",
-		runner.WithProtoFile("magegrpc.proto", []string{}),
-		runner.WithConcurrency(uint(threads)),
-		runner.WithRunDuration(duration),
-		runner.WithDurationStopAction("ignore"),
-		runner.WithSkipFirst(10),
-		runner.WithInsecure(true),
-		runner.WithData(GrpcRequest{N: int32(prod)}),
+		options...
 	)
 	javaReport, javaErr := runner.Run(
 		"magento.grpcTestApi.proto.Products.read",
 		"mage-grpc-javaserver:9000",
-		runner.WithProtoFile("magegrpc.proto", []string{}),
-		runner.WithConcurrency(uint(threads)),
-		runner.WithRunDuration(duration),
-		runner.WithDurationStopAction("ignore"),
-		runner.WithSkipFirst(10),
-		runner.WithInsecure(true),
-		runner.WithData(GrpcRequest{N: int32(prod)}),
+		options...
 	)
 	mageReport, mageErr := runner.Run(
 		"magento.grpcTestApi.proto.Products.read",
 		"catalogstorefront:9001",
-		runner.WithProtoFile("magegrpc.proto", []string{}),
-		runner.WithConcurrency(uint(threads)),
-		runner.WithRunDuration(duration),
-		runner.WithDurationStopAction("ignore"),
-		runner.WithSkipFirst(10),
-		runner.WithInsecure(true),
-		runner.WithData(GrpcRequest{N: int32(prod)}),
+		options...
 	)
 
 	response := make(map[string]ResponseData)
