@@ -4,4 +4,4 @@ grpc:
     workers:
         command: "../vendor/bin/worker"
         pool:
-            numWorkers: 4
+            numWorkers: 8

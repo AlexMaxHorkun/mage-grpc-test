@@ -1,0 +1,20 @@
+{
+  "proto": "/test/test.proto",
+  "call": "magento.grpcTestApi.proto.Products.read",
+  "total": 1,
+  "insecure":true,
+  "duration-stop": "ignore",
+  "concurrency": 1,
+  "data": {
+    "n": 10
+  },
+  "metadata": {
+    "foo": "bar",
+    "trace_id": "{{.RequestNumber}}",
+    "timestamp": "{{.TimestampUnix}}"
+  },
+  "skipFirst": 10,
+  "host-php+roadrunner": "catalogstorefront:9001",
+  "host-java": "mage-grpc-javaserver:9000",
+  "host-php+go": "mage-grpc-phpserver:9000"
+}

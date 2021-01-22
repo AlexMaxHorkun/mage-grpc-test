@@ -1,6 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: grpc-testing-deployment
+  labels:
+    app: grpc-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-testing
+  template:
+    metadata:
+      labels:
+        app: grpc-testing
+    spec:
+      containers:
+        - name: grpc-testing
+          # "cloud" tag do not need volumes
+          image: mslabko/grpc-testing-ghz:cloud
+          imagePullPolicy: Always
+          tty: true
+          command: ["/bin/sh"]
+# uncomment for local testing
+#          volumeMounts:
+#            - name: config
+#              mountPath: /test/ghz_config.json
+#            - name: proto
+#              mountPath: /test/test.proto
+#      volumes:
+#        - name: config
+#          hostPath:
+#            # TODO: change to absolute path
+#            path: ../measurements/ghz_config.json
+#        - name: proto
+#          hostPath:
+#            # TODO: change to absolute path
+#            path: ../grpc/src/main/proto/magegrpc.proto
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: mage-grpc-client-deployment
   labels:
     app: mage-grpc-client
@@ -371,7 +410,7 @@ spec:
               containerPort: 9200
           env:
             - name: ES_JAVA_OPTS
-              value: "-Xms512m -Xmx512m"
+              value: "-Xms1024m -Xmx1024m"
             - name: cluster.name
               value: "docker-cluster"
             - name: discovery.type
