@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 public class Products extends ProductsGrpc.ProductsImplBase {
@@ -177,6 +178,17 @@ public class Products extends ProductsGrpc.ProductsImplBase {
             return;
         }
         responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void readFromMemory(Magegrpc.ReadRequest request, StreamObserver<Magegrpc.ReadResponse> responseObserver) {
+        responseObserver.onNext(
+                Magegrpc.ReadResponse.newBuilder()
+                        .addAllItems(manager.generateData(request.getN()).stream().map(Products::createProductOf)
+                                .collect(Collectors.toList()))
+                        .build()
+        );
         responseObserver.onCompleted();
     }
 

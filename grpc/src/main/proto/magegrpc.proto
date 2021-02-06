@@ -1,6 +1,9 @@
 syntax = "proto3";
 option java_package = "com.magento.grpctest.def";
+
 package magento.grpcTestApi.proto;
+
+option php_metadata_namespace = "Magento\\GrpcTestApi\\Metadata";
 
 //DTOs
 message GenerateArg {
@@ -44,6 +47,8 @@ service Products {
   rpc generate(GenerateArg) returns (stream Product);
 
   rpc read(ReadRequest) returns (ReadResponse);
+
+  rpc readFromMemory(ReadRequest) returns (ReadResponse);
 
   rpc clear(ClearArg) returns (Cleared);
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -23,7 +24,7 @@ public class ProductManager {
         this.repo = repo;
     }
 
-    public ProductRepo.PersistResult generate(int count) {
+    public Set<Product> generateData(int count) {
         var generated = new HashSet<Product>();
         for (int i = 0; i < count; i++) {
             var id = 1 +rand.nextInt(100000);
@@ -50,7 +51,11 @@ public class ProductManager {
             generated.add(prod);
         }
 
-        return repo.persistAll(generated);
+        return generated;
+    }
+
+    public ProductRepo.PersistResult generate(int count) {
+        return repo.persistAll(generateData(count));
     }
 
     public long count() {
