@@ -3,8 +3,7 @@ package com.magento.grpctest.server.model.grpc;
 import com.magento.grpctest.def.Magegrpc;
 import com.magento.grpctest.def.ProductsGrpc;
 import com.magento.grpctest.server.model.ProductManager;
-import com.magento.grpctest.server.model.storage.ProductRepo;
-import com.magento.grpctest.server.model.storage.data.Product;
+import com.magento.grpctest.server.model.storage.PersistResult;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,6 @@ import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 @Service
 public class Products extends ProductsGrpc.ProductsImplBase {
@@ -54,7 +52,7 @@ public class Products extends ProductsGrpc.ProductsImplBase {
     }
 
     private final static class GeneratedResultPropagator implements Runnable {
-        private final ProductRepo.PersistResult persisted;
+        private final PersistResult persisted;
 
         private final StreamWrapper responseObserver;
 
@@ -62,7 +60,7 @@ public class Products extends ProductsGrpc.ProductsImplBase {
 
         private final CompletableFuture<PropagationResult> future = new CompletableFuture<>();
 
-        public GeneratedResultPropagator(ProductRepo.PersistResult persisted, StreamWrapper responseObserver) {
+        public GeneratedResultPropagator(PersistResult persisted, StreamWrapper responseObserver) {
             this.persisted = persisted;
             this.responseObserver = responseObserver;
         }
@@ -84,8 +82,8 @@ public class Products extends ProductsGrpc.ProductsImplBase {
             return future;
         }
 
-        private void relay(Product product) {
-            responseObserver.send(createProductOf(product));
+        private void relay(Magegrpc.Product product) {
+            responseObserver.send(product);
         }
     }
 
@@ -171,7 +169,7 @@ public class Products extends ProductsGrpc.ProductsImplBase {
     public void read(Magegrpc.ReadRequest request, StreamObserver<Magegrpc.ReadResponse> responseObserver) {
         var response = Magegrpc.ReadResponse.newBuilder();
         try {
-            manager.find(request.getN()).forEach(p -> response.addItems(createProductOf(p)));
+            manager.find(request.getN()).forEach(response::addItems);
         } catch (Throwable ex) {
             responseObserver.onError(ex);
             logger.error("[GRPC] Read operation error", ex);
@@ -185,31 +183,9 @@ public class Products extends ProductsGrpc.ProductsImplBase {
     public void readFromMemory(Magegrpc.ReadRequest request, StreamObserver<Magegrpc.ReadResponse> responseObserver) {
         responseObserver.onNext(
                 Magegrpc.ReadResponse.newBuilder()
-                        .addAllItems(manager.generateData(request.getN()).stream().map(Products::createProductOf)
-                                .collect(Collectors.toList()))
+                        .addAllItems(manager.generateData(request.getN()))
                         .build()
         );
         responseObserver.onCompleted();
-    }
-
-    private static Magegrpc.Product createProductOf(Product product) {
-        var grpcProduct = Magegrpc.Product.newBuilder()
-                .setId(product.getId().toString())
-                .setSku(product.getSku())
-                .setTitle(product.getTitle())
-                .setDescription(product.getDescription())
-                .setPrice(product.getPrice())
-                .setAvailable(product.getAvailable())
-                .setImgUrl(product.getImgUrl());
-        for (var option : product.getOptions()) {
-            grpcProduct.addOptions(Magegrpc.Option.newBuilder()
-                    .setId(option.getId().toString())
-                    .setTitle(option.getTitle())
-                    .setPrice(option.getPrice())
-                    .setAvailable(option.getAvailable())
-                    .build());
-        }
-
-        return grpcProduct.build();
     }
 }

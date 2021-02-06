@@ -1,10 +1,8 @@
 package com.magento.grpctest.server.model;
 
+import com.magento.grpctest.def.Magegrpc;
+import com.magento.grpctest.server.model.storage.PersistResult;
 import com.magento.grpctest.server.model.storage.ProductRepo;
-import com.magento.grpctest.server.model.storage.data.Option;
-import com.magento.grpctest.server.model.storage.data.Product;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,37 +22,36 @@ public class ProductManager {
         this.repo = repo;
     }
 
-    public Set<Product> generateData(int count) {
-        var generated = new HashSet<Product>();
+    public Set<Magegrpc.Product> generateData(int count) {
+        var generated = new HashSet<Magegrpc.Product>();
         for (int i = 0; i < count; i++) {
             var id = 1 +rand.nextInt(100000);
-            var prod = new Product();
-            prod.setId(UUID.randomUUID());
+            var prod = Magegrpc.Product.newBuilder();
+            prod.setId(UUID.randomUUID().toString());
             prod.setSku(String.format("sku_%d", id));
             prod.setTitle(String.format("Product #%d", id));
             prod.setDescription(String.format("Generated Product #%d", id));
             prod.setPrice(rand.nextFloat() * 10000);
             prod.setImgUrl(String.format("/media/prod_img_%d.jpg", id));
             prod.setAvailable(true);
-            var options = new HashSet<Option>();
+            var options = new HashSet<Magegrpc.Option>();
             for (int j = 0; j < 10; j++) {
-                var option = new Option();
-                option.setId(UUID.randomUUID());
+                var option = Magegrpc.Option.newBuilder();
+                option.setId(UUID.randomUUID().toString());
                 option.setTitle(String.format("Option #%d", j));
                 option.setPrice(rand.nextFloat() * 10000);
                 option.setAvailable(true);
-                options.add(option);
-                option.setProduct(prod);
+                options.add(option.build());
             }
-            prod.setOptions(options);
+            prod.addAllOptions(options);
 
-            generated.add(prod);
+            generated.add(prod.build());
         }
 
         return generated;
     }
 
-    public ProductRepo.PersistResult generate(int count) {
+    public PersistResult generate(int count) {
         return repo.persistAll(generateData(count));
     }
 
@@ -66,7 +63,7 @@ public class ProductManager {
         repo.clear();
     }
 
-    public List<Product> find(int limit) {
+    public List<Magegrpc.Product> find(int limit) {
         return repo.findAll(limit);
     }
 }

@@ -1,6 +1,6 @@
-package com.magento.grpctest.server.model.storage;
+package com.magento.grpctest.server.model.storage.rdb;
 
-import com.magento.grpctest.server.model.storage.data.Option;
+import com.magento.grpctest.server.model.storage.rdb.data.Option;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

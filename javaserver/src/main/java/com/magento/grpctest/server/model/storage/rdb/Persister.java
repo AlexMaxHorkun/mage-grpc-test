@@ -1,6 +1,6 @@
-package com.magento.grpctest.server.model.storage;
+package com.magento.grpctest.server.model.storage.rdb;
 
-import com.magento.grpctest.server.model.storage.data.Product;
+import com.magento.grpctest.server.model.storage.rdb.data.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,11 +1,14 @@
-package com.magento.grpctest.server.model.storage.data;
+package com.magento.grpctest.server.model.storage.elastic.data;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 import java.util.Set;
 import java.util.UUID;
 
-@Entity
-@Table(name="prods")
+@Document(indexName = "magento")
 public class Product {
     @Id
     private UUID id;
@@ -22,7 +25,7 @@ public class Product {
 
     private Boolean available;
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "product", fetch = FetchType.LAZY)
+    @Field(type = FieldType.Nested, includeInParent = false)
     private Set<Option> options;
 
     public Product() {}

@@ -1,17 +1,14 @@
-package com.magento.grpctest.server.model.storage.data;
+package com.magento.grpctest.server.model.storage.elastic.data;
 
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+
 import java.util.UUID;
 
-@Entity
-@Table(name="prod_options")
+@Document(indexName = "magento")
 public class Option {
     @Id
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "prod_id", nullable = false)
-    private Product product;
 
     private String title;
 
@@ -27,14 +24,6 @@ public class Option {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
     }
 
     public String getTitle() {
