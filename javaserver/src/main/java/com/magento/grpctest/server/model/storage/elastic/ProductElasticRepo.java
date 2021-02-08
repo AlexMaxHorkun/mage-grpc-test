@@ -106,7 +106,7 @@ public class ProductElasticRepo implements ProductRepo {
         if (count <= limit) {
             page = 1;
         } else {
-            page = rand.nextInt(count / limit + ((count % limit == 0) ? 0 : 1));
+            page = rand.nextInt(count / limit + ((count % limit == 0) ? 0 : 1) - 1);
         }
 
         return repo.findAll(PageRequest.of(page, limit)).map(ProductElasticRepo::convertToProduct).toList();
