@@ -26,7 +26,6 @@ public class Config {
                 = ClientConfiguration.builder()
                 .connectedTo(new InetSocketAddress(host, Integer.parseInt(port)))
                 .build();
-        LoggerFactory.getLogger(getClass()).warn(String.format("Elastic HOST+PORT: \"%s\"", host + ":" + port));
 
         return RestClients.create(clientConfiguration).rest();
     }

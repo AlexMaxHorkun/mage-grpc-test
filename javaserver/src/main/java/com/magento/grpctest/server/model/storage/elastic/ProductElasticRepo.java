@@ -122,7 +122,7 @@ public class ProductElasticRepo implements ProductRepo {
         row.setTitle(product.getTitle());
         row.setImgUrl(product.getImgUrl());
 
-        var rowOptions = new HashSet<Option>();
+        var rowOptions = new ArrayList<Option>();
         for (var opt : product.getOptionsList()) {
             var rowOption = new Option();
             rowOption.setId(UUID.fromString(opt.getId()));

@@ -5,6 +5,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,8 +26,8 @@ public class Product {
 
     private Boolean available;
 
-    @Field(type = FieldType.Nested, includeInParent = false)
-    private Set<Option> options;
+    @Field(type = FieldType.Nested, includeInParent = true)
+    private List<Option> options;
 
     public Product() {}
 
@@ -86,11 +87,11 @@ public class Product {
         this.available = available;
     }
 
-    public Set<Option> getOptions() {
+    public List<Option> getOptions() {
         return options;
     }
 
-    public void setOptions(Set<Option> options) {
+    public void setOptions(List<Option> options) {
         this.options = options;
     }
 }
